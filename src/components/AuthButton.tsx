@@ -13,22 +13,23 @@ export function AuthButton() {
 
   if (session) {
     return (
-      <div className="flex items-center space-x-3">
-        <div className="flex items-center space-x-3 px-3 py-1.5 bg-gray-100 dark:bg-gray-800 rounded-full">
+      <div className="flex items-center space-x-2 sm:space-x-3">
+        <div className="flex items-center space-x-2 sm:space-x-3 px-2 sm:px-3 py-1 sm:py-1.5 bg-gray-100 dark:bg-gray-800 rounded-full">
           <img 
             src={session.user?.image || ''} 
             alt="Profile"
-            className="w-6 h-6 rounded-full"
+            className="w-5 h-5 sm:w-6 sm:h-6 rounded-full"
           />
-          <span className="text-gray-900 dark:text-white text-sm font-medium max-w-32 truncate">
+          <span className="hidden sm:block text-gray-900 dark:text-white text-sm font-medium max-w-24 sm:max-w-32 truncate">
             {session.user?.name}
           </span>
         </div>
         <button
           onClick={() => signOut()}
-          className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white border border-gray-300 dark:border-gray-600 rounded-full hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+          className="px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white border border-gray-300 dark:border-gray-600 rounded-full hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
         >
-          Sign out
+          <span className="hidden sm:inline">Sign out</span>
+          <span className="sm:hidden">Out</span>
         </button>
       </div>
     )

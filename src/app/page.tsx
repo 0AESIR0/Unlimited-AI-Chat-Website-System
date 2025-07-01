@@ -18,20 +18,20 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen bg-white dark:bg-gray-900 flex flex-col">
+    <div className="h-screen bg-white dark:bg-gray-900 flex flex-col overflow-hidden">
       {/* ChatGPT-style Header */}
-      <header className="border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-14">
-            <div className="flex items-center space-x-3">
-              <div className="w-8 h-8 bg-green-500 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-sm">C</span>
+      <header className="border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 z-50 flex-shrink-0">
+        <div className="w-full px-3 sm:px-4 lg:px-6">
+          <div className="flex justify-between items-center h-12 sm:h-14">
+            <div className="flex items-center space-x-2 sm:space-x-3 min-w-0">
+              <div className="w-7 h-7 sm:w-8 sm:h-8 bg-green-500 rounded-lg flex items-center justify-center flex-shrink-0">
+                <span className="text-white font-bold text-xs sm:text-sm">C</span>
               </div>
-              <h1 className="text-lg font-semibold text-gray-900 dark:text-white">
+              <h1 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white truncate">
                 Copilot Chat
               </h1>
             </div>
-            <div className="flex items-center space-x-3">
+            <div className="flex items-center space-x-2 sm:space-x-3 flex-shrink-0">
               <ThemeToggle />
               <AuthButton />
             </div>

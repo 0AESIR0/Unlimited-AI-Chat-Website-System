@@ -177,9 +177,14 @@ Sen nasılsın? Bugün hangi projelerin var? Kod yazıyor musun, yoksa yeni bir 
     return modelInfo + `🚀 **GitHub Models API ${model} Süper Güçlerim:**
 
 💬 **Sohbet:**
-- Her konuda konuşurum
-- Sorularını yanıtlarım
-- Z kuşağı tarzında samimi chat
+- Emojiler full aktif 🧠🔥
+- Sokak ağzı + Gen Z tarzı = benim dilim 😮‍💨
+- Kaynak varsa basarım linki 📎
+- Az laf, öz bilgi 🔪
+- Dolandırmam, pat çat söylerim 😤
+- Dil Türkçe, kafa net 🟢
+- Yalakalık yok, samimiyet var 🤝
+- Küfürlük yer varsa sansürlemeden çeviririm, şak diye oturur 😮‍💨
 
 💻 **Kod Yazma:**
 - React, Python, JS, TS, Rust...
