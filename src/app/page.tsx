@@ -1,5 +1,6 @@
 'use client'
 
+import { useState } from 'react'
 import { ChatInterface } from '../components/ChatInterface'
 import { AuthButton } from '../components/AuthButton'
 import { ThemeToggle } from '../components/ThemeToggle'

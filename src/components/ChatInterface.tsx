@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
+import { useSession } from 'next-auth/react'
 import { Send, Plus, User, Bot } from 'lucide-react'
 import { ModelSelector } from './ModelSelector'
 
@@ -12,6 +13,7 @@ interface Message {
 }
 
 export function ChatInterface() {
+  const { data: session } = useSession()
   const [messages, setMessages] = useState<Message[]>([])
   const [input, setInput] = useState('')
   const [isLoading, setIsLoading] = useState(false)
@@ -65,7 +67,7 @@ export function ChatInterface() {
       }
 
       setMessages(prev => [...prev, assistantMessage])
-    } catch {
+    } catch (error) {
       const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
         content: 'Sorry, I encountered an error. Please try again.',

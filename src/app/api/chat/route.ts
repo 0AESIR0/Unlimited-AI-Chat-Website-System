@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 
-export const dynamic = 'force-dynamic'
-
 export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession()
@@ -32,7 +30,7 @@ export async function POST(request: NextRequest) {
         Kullanıcı premium GitHub hesabı ile limitsiz AI model erişimi var! Model: ${model} 🚀`
       },
       // Geçmiş mesajları ekle
-      ...history.map((msg: { role: string; content: string }) => ({
+      ...history.map((msg: any) => ({
         role: msg.role,
         content: msg.content
       })),
@@ -84,7 +82,7 @@ export async function POST(request: NextRequest) {
 }
 
 // Fallback response function - Gerçek AI API erişimi yoksa
-async function generateFallbackResponse(message: string, history: { role: string; content: string }[], model: string) {
+async function generateFallbackResponse(message: string, history: any[], model: string) {
   const lowerMessage = message.toLowerCase()
   
   // Model bilgisini dahil et
@@ -213,7 +211,7 @@ Ne yapmak istiyorsun knkm? 🔥`
 }
 
 // CORS headers
-export async function OPTIONS() {
+export async function OPTIONS(request: NextRequest) {
   return new NextResponse(null, {
     status: 200,
     headers: {
