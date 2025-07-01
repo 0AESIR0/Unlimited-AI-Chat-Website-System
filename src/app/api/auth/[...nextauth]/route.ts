@@ -1,6 +1,9 @@
 import NextAuth from 'next-auth'
 import GitHubProvider from 'next-auth/providers/github'
 
+// Force dynamic rendering for this route
+export const dynamic = 'force-dynamic'
+
 const handler = NextAuth({
   providers: [
     GitHubProvider({
