@@ -1,0 +1,90 @@
+'use client'
+
+import { useState } from 'react'
+import { ChatInterface } from '../components/ChatInterface'
+import { AuthButton } from '../components/AuthButton'
+import { ThemeToggle } from '../components/ThemeToggle'
+import { useSession } from 'next-auth/react'
+
+export default function Home() {
+  const { data: session, status } = useSession()
+
+  if (status === 'loading') {
+    return (
+      <div className="min-h-screen bg-white dark:bg-gray-900 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-2 border-gray-300 border-t-green-500"></div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="min-h-screen bg-white dark:bg-gray-900 flex flex-col">
+      {/* ChatGPT-style Header */}
+      <header className="border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-14">
+            <div className="flex items-center space-x-3">
+              <div className="w-8 h-8 bg-green-500 rounded-lg flex items-center justify-center">
+                <span className="text-white font-bold text-sm">C</span>
+              </div>
+              <h1 className="text-lg font-semibold text-gray-900 dark:text-white">
+                Copilot Chat
+              </h1>
+            </div>
+            <div className="flex items-center space-x-3">
+              <ThemeToggle />
+              <AuthButton />
+            </div>
+          </div>
+        </div>
+      </header>
+
+      {/* Main Content */}
+      <main className="flex-1 flex">
+        {session ? (
+          <ChatInterface />
+        ) : (
+          <div className="flex-1 flex items-center justify-center">
+            <div className="max-w-2xl mx-auto text-center px-6">
+              <div className="w-16 h-16 bg-green-500 rounded-2xl flex items-center justify-center mx-auto mb-8">
+                <span className="text-white font-bold text-2xl">C</span>
+              </div>
+              
+              <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
+                GitHub Copilot Chat
+              </h1>
+              
+              <p className="text-xl text-gray-600 dark:text-gray-300 mb-8 leading-relaxed">
+                Unlimited AI conversations powered by GitHub Copilot. 
+                Access GPT-4, Claude, and more without limits.
+              </p>
+              
+              <div className="space-y-4 mb-8">
+                <div className="flex items-center justify-center space-x-6 text-sm text-gray-500 dark:text-gray-400">
+                  <div className="flex items-center space-x-2">
+                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                    <span>Unlimited conversations</span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                    <span>Multiple AI models</span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
+                    <span>Code generation</span>
+                  </div>
+                </div>
+              </div>
+              
+              <AuthButton />
+              
+              <div className="mt-8 text-xs text-gray-400 dark:text-gray-500">
+                By using this service, you agree to our Terms and Privacy Policy
+              </div>
+            </div>
+          </div>
+        )}
+      </main>
+    </div>
+  )
+}
