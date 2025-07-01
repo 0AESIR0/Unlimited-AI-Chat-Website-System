@@ -30,7 +30,7 @@ export async function POST(request: NextRequest) {
         Kullanıcı premium GitHub hesabı ile limitsiz AI model erişimi var! Model: ${model} 🚀`
       },
       // Geçmiş mesajları ekle
-      ...history.map((msg: any) => ({
+      ...history.map((msg: { role: string; content: string }) => ({
         role: msg.role,
         content: msg.content
       })),
@@ -82,7 +82,7 @@ export async function POST(request: NextRequest) {
 }
 
 // Fallback response function - Gerçek AI API erişimi yoksa
-async function generateFallbackResponse(message: string, history: any[], model: string) {
+async function generateFallbackResponse(message: string, history: { role: string; content: string }[], model: string) {
   const lowerMessage = message.toLowerCase()
   
   // Model bilgisini dahil et
@@ -211,7 +211,7 @@ Ne yapmak istiyorsun knkm? 🔥`
 }
 
 // CORS headers
-export async function OPTIONS(request: NextRequest) {
+export async function OPTIONS() {
   return new NextResponse(null, {
     status: 200,
     headers: {
