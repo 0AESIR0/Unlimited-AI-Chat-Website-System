@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
+import { uploadToImgBB } from '@/utils/imgbbUpload'
 
 export async function POST(request: NextRequest) {
   try {
@@ -12,13 +13,86 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const { message, history, model = 'gpt-4o' } = await request.json()
+    const { message, history, model = 'gpt-4.1' } = await request.json()
 
     if (!message?.trim()) {
       return NextResponse.json(
         { error: 'Boş mesaj gönderemezsin! 😅' },
         { status: 400 }
       )
+    }
+
+    // Debug: Model ve resim algılama kontrolü
+    console.log('🔍 Debug - Model:', model)
+    console.log('🔍 Debug - Mesaj:', message)
+    
+    // Akıllı resim algılama - GPT chat'lerinde resim isteği kontrolü
+    const isImageRequest = checkImageRequest(message)
+    console.log('🔍 Debug - Resim isteği algılandı mı?', isImageRequest)
+    console.log('🔍 Debug - Model gpt içeriyor mu?', model.includes('gpt'))
+    
+    if (isImageRequest && (model.includes('gpt') || model.includes('phi'))) {
+      console.log('🎨 GPT resim isteği algılandı, Stable Diffusion\'a yönlendiriliyor...')
+      console.log('📝 Orijinal mesaj:', message)
+      
+      // GPT'den önce detayları al ve prompt optimize et
+      const optimizedPrompt = await generateImagePrompt(message, history, model)
+      
+      // Stable Diffusion ile resim çiz
+      return await generateImageWithStableDiffusion(optimizedPrompt, message)
+    }
+
+    // Cloudflare AI - Stable Diffusion XL için direkt resim çizdirme
+    if (model === 'stable-diffusion-xl-base-1.0') {
+      console.log('🎨 Stable Diffusion XL ile resim çiziliyor...')
+      console.log('📝 Prompt:', message)
+      
+      try {
+        const imageResponse = await fetch(
+          `https://api.cloudflare.com/client/v4/accounts/${process.env.CLOUDFLARE_ACCOUNT_ID}/ai/run/@cf/stabilityai/stable-diffusion-xl-base-1.0`,
+          {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${process.env.CLOUDFLARE_API_TOKEN}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              prompt: message
+            })
+          }
+        )
+
+        if (!imageResponse.ok) {
+          throw new Error(`Cloudflare AI hatası: ${imageResponse.status}`)
+        }
+
+        const imageBuffer = await imageResponse.arrayBuffer()
+        console.log('📏 Resim boyutu:', imageBuffer.byteLength, 'bytes')
+        
+        if (imageBuffer.byteLength === 0) {
+          throw new Error('Boş resim buffer')
+        }
+
+        // ImgBB'ye upload et
+        console.log('📤 ImgBB\'ye upload ediliyor...')
+        
+        const timestamp = Date.now()
+        const fileName = `ai-generated-${timestamp}.png`
+        
+        const imageUrl = await uploadToImgBB(Buffer.from(imageBuffer), fileName)
+        
+        console.log('✅ Resim başarıyla ImgBB\'ye upload edildi:', imageUrl)
+        
+        return NextResponse.json({ 
+          message: `🎨 İşte çizdiğim resim: "${message}"\n\n![Generated Image](${imageUrl})\n\n✨ Cloudflare AI ile çizildi!\n🌐 Başka bir isteğin var mı? 🖼️`
+        })
+        
+      } catch (error: any) {
+        console.log('❌ Resim çizme veya upload hatası:', error.message)
+        return NextResponse.json({ 
+          message: `🎨 Resim çizmeye çalışıyorum ama bir sorun var: ${error.message}\n\nTekrar dener misin? 😅`
+        })
+      }
     }
 
     // GitHub Models API için mesaj formatını hazırla
@@ -59,8 +133,15 @@ export async function POST(request: NextRequest) {
     })
 
     if (!response.ok) {
-      // GitHub Models API hata verirse fallback kullan
       console.log('GitHub Models API error:', response.status, response.statusText)
+      
+      // Rate limit kontrolü
+      if (response.status === 429) {
+        console.log('🚦 Rate limit algılandı, fallback modele geçiliyor...')
+        return await handleRateLimit(message, history, model)
+      }
+      
+      // Diğer hatalar için fallback
       const fallbackResponse = await generateFallbackResponse(message, history, model)
       return NextResponse.json({ message: fallbackResponse })
     }
@@ -213,6 +294,317 @@ Ne yapmak istiyorsun knkm? 🔥`
   ]
   
   return modelInfo + responses[Math.floor(Math.random() * responses.length)]
+}
+
+// Akıllı resim algılama fonksiyonu
+function checkImageRequest(message: string): boolean {
+  const lowerMessage = message.toLowerCase()
+  
+  const imageKeywords = [
+    'resim', 'çiz', 'görsel', 'image', 'picture', 'draw', 'paint', 'create',
+    'fotoğraf', 'illüstrasyon', 'artwork', 'sanat', 'tasarım', 'logo',
+    'banner', 'poster', 'karakter', 'manzara', 'portre', 'çizim'
+  ]
+  
+  const requestWords = [
+    'yapar mısın', 'yapabilir misin', 'oluştur', 'üret', 'göster',
+    'istiyorum', 'isterim', 'çıkar', 'yap', 'hazırla',
+    'çizebilir misin', 'çizebilir', 'çizer misin', 'çiz',
+    'yaparmısın', 'yaparmisin', 'istiyoeum', 'istiyom',
+    'oluştururmusun', 'oluşturur musun', 'çizermisin', 'çizarmısın'
+  ]
+  
+  const hasImageKeyword = imageKeywords.some(keyword => lowerMessage.includes(keyword))
+  const hasRequestWord = requestWords.some(word => lowerMessage.includes(word))
+  
+  console.log('🔍 Debug - Image keywords bulundu:', imageKeywords.filter(keyword => lowerMessage.includes(keyword)))
+  console.log('🔍 Debug - Request words bulundu:', requestWords.filter(word => lowerMessage.includes(word)))
+  console.log('🔍 Debug - hasImageKeyword:', hasImageKeyword)
+  console.log('🔍 Debug - hasRequestWord:', hasRequestWord)
+  
+  return hasImageKeyword && hasRequestWord
+}
+
+// GPT ile akıllı prompt oluşturma
+async function generateImagePrompt(message: string, history: any[], model: string): Promise<string> {
+  try {
+    console.log('🧠 GPT ile resim prompt\'u optimize ediliyor...')
+    
+    const promptMessages = [
+      {
+        role: 'system',
+        content: `Sen bir AI resim prompt uzmanısın. Kullanıcının resim isteğini alıp Stable Diffusion XL için mükemmel bir İngilizce prompt oluşturuyorsun.
+
+KURALLARI:
+1. Öncelikle kullanıcıya nasıl bir resim istediğini sor.
+2. Gerekirse kullanıcıya sorular sorarak detayları öğren.
+3. Kullanıcının verdiği bilgileri kullanarak detaylı, açıklayıcı bir prompt oluştur.
+4. Sadece İngilizce prompt döndür
+5. Kullanıcının verdiği mesajı optimize et, gereksiz kelimeleri at.
+6. Kullanıcıya örnek bir prompt göster, böylece ne beklemesi gerektiğini anlar.
+7. Kullanıcının isteğine göre detaylı, açıklayıcı bir prompt oluştur:
+8. Sanatsal stilleri kullanıcın isteğine göre ekle.
+9. Kalite kelimelerini kullanıcın isteğine göre düşünüp ekle.
+10. Teknik detaylar ekle
+11. Negatif prompt'a ihtiyaç yok
+12. Prompt optimizasyonu yap, gereksiz ifadeleri "Thank you for the details!" gibi kullanıcıya söylediğin ekstra metinleri ekleme.
+13. Promptu türkçe değil tamamen uyumlu olacak ingilizce yaz.
+
+ÖRNEK:
+Kullanıcı: "bir kedi çiz"
+Sen: "a beautiful fluffy cat sitting in a garden, realistic style, high quality, detailed fur texture, natural lighting, 4k resolution, masterpiece"
+
+Transform this request into the perfect English prompt:`
+      },
+      ...history.slice(-3).map((msg: any) => ({
+        role: msg.role,
+        content: msg.content
+      })),
+      {
+        role: 'user',
+        content: message
+      }
+    ]
+    
+    const response = await fetch('https://models.inference.ai.azure.com/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${process.env.GITHUB_TOKEN}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: model,
+        messages: promptMessages,
+        temperature: 0.7,
+        max_tokens: 2000
+      })
+    })
+    
+    if (response.ok) {
+      const data = await response.json()
+      const optimizedPrompt = data.choices[0]?.message?.content || message
+      console.log('✨ Optimize edilmiş prompt:', optimizedPrompt)
+      return optimizedPrompt.trim()
+    } else {
+      console.log('⚠️ GPT prompt optimizasyonu başarısız:', response.status, response.statusText)
+      const errorText = await response.text()
+      console.log('⚠️ Hata detayı:', errorText)
+      
+      // Rate limit kontrolü
+      if (response.status === 429) {
+        console.log('🚦 Prompt optimizasyonu rate limit\'te, fallback prompt kullanılıyor...')
+      }
+      
+      // Fallback: Basit optimizasyon yap
+      const fallbackPrompt = createFallbackPrompt(message)
+      console.log('🔄 Fallback prompt kullanılıyor:', fallbackPrompt)
+      return fallbackPrompt
+    }
+    
+  } catch (error) {
+    console.log('❌ Prompt optimizasyon hatası:', error)
+    // Fallback: Basit optimizasyon yap
+    const fallbackPrompt = createFallbackPrompt(message)
+    console.log('🔄 Fallback prompt kullanılıyor:', fallbackPrompt)
+    return fallbackPrompt
+  }
+}
+
+// Basit fallback prompt optimizasyonu
+function createFallbackPrompt(message: string): string {
+  const lowerMessage = message.toLowerCase()
+  
+  // Anime/manga tarzı algılama
+  const isAnime = lowerMessage.includes('anime') || lowerMessage.includes('manga')
+  
+  // Karakter algılama
+  const hasCharacter = lowerMessage.includes('insan') || lowerMessage.includes('kız') || lowerMessage.includes('erkek') || lowerMessage.includes('samurai')
+  
+  // Nesne algılama
+  const hasWeapon = lowerMessage.includes('katana') || lowerMessage.includes('kılıç') || lowerMessage.includes('silah')
+  
+  // Renk algılama
+  const hasNeonColors = lowerMessage.includes('neon') || lowerMessage.includes('pembe') || lowerMessage.includes('mor')
+  
+  // Lokasyon algılama
+  const hasCity = lowerMessage.includes('şehir') || lowerMessage.includes('gökdelen') || lowerMessage.includes('çatı')
+  
+  // Basit İngilizce prompt oluştur
+  let prompt = ""
+  
+  if (hasCharacter) {
+    if (lowerMessage.includes('samurai')) {
+      prompt += "anime samurai warrior"
+    } else {
+      prompt += "anime character"
+    }
+  }
+  
+  if (hasWeapon) {
+    prompt += " holding katana sword"
+  }
+  
+  if (hasCity) {
+    prompt += " standing on rooftop overlooking city skyline"
+  }
+  
+  if (hasNeonColors) {
+    prompt += " with neon pink and black hair, cyberpunk neon colors"
+  }
+  
+  if (isAnime) {
+    prompt += " anime style, detailed"
+  }
+  
+  prompt += " high quality, masterpiece, detailed artwork"
+  
+  return prompt.trim() || message
+}
+
+// Stable Diffusion ile resim oluşturma
+async function generateImageWithStableDiffusion(prompt: string, originalMessage: string): Promise<NextResponse> {
+  try {
+    console.log('🎨 Stable Diffusion XL ile resim çiziliyor...')
+    console.log('📝 Optimize edilmiş prompt:', prompt)
+    
+    const imageResponse = await fetch(
+      `https://api.cloudflare.com/client/v4/accounts/${process.env.CLOUDFLARE_ACCOUNT_ID}/ai/run/@cf/stabilityai/stable-diffusion-xl-base-1.0`,
+      {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${process.env.CLOUDFLARE_API_TOKEN}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          prompt: prompt
+        })
+      }
+    )
+
+    if (!imageResponse.ok) {
+      throw new Error(`Cloudflare AI hatası: ${imageResponse.status}`)
+    }
+
+    const imageBuffer = await imageResponse.arrayBuffer()
+    console.log('📏 Resim boyutu:', imageBuffer.byteLength, 'bytes')
+    
+    if (imageBuffer.byteLength === 0) {
+      throw new Error('Boş resim buffer')
+    }
+
+    // ImgBB'ye upload et
+    console.log('📤 ImgBB\'ye upload ediliyor...')
+    
+    const timestamp = Date.now()
+    const fileName = `ai-generated-${timestamp}.png`
+    
+    try {
+      // ImgBB'ye upload et
+      const imageUrl = await uploadToImgBB(Buffer.from(imageBuffer), fileName)
+      
+      console.log('✅ Resim başarıyla ImgBB\'ye upload edildi:', imageUrl)
+      
+      return NextResponse.json({ 
+        message: `🎨 İşte çizdiğim resim!\n\n![Generated Image](${imageUrl})\n\n✨ GPT tarafından optimize edilerek çizildi!\n📝 Kullanılan prompt: "${prompt}"\n\nBaşka bir isteğin var mı? 🖼️`
+      })
+      
+    } catch (uploadError: any) {
+      console.log('💥 ImgBB upload hatası:', uploadError.message)
+      
+      // Upload başarısız olursa fallback olarak base64 kullan
+      const imageBase64 = Buffer.from(imageBuffer).toString('base64')
+      const fallbackImageUrl = `data:image/png;base64,${imageBase64}`
+      
+      return NextResponse.json({ 
+        message: `🎨 İşte çizdiğim resim!\n\n![Generated Image](${fallbackImageUrl})\n\n✨ GPT tarafından optimize edilerek çizildi!\n📝 Kullanılan prompt: "${prompt}"\n\nBaşka bir isteğin var mı? 🖼️`
+      })
+    }
+    
+  } catch (error: any) {
+    console.log('❌ Resim çizme hatası:', error.message)
+    return NextResponse.json({ 
+      message: `🎨 Resim çizmeye çalışıyorum ama bir sorun var: ${error.message}\n\nTekrar dener misin? 😅`
+    })
+  }
+}
+
+// Rate limit durumunda fallback model kullanma
+async function handleRateLimit(message: string, history: any[], originalModel: string): Promise<NextResponse> {
+  console.log('🔄 Rate limit fallback başlatılıyor...')
+  
+  // Fallback model sıralaması
+  const fallbackModels = [
+    'gpt-4o-mini',
+    'gpt-4',
+    'gpt-3.5-turbo',
+    'phi-3.5-mini-instruct',
+    'meta-llama-3.1-70b-instruct'
+  ]
+  
+  // Orijinal modeli listeden çıkar
+  const availableModels = fallbackModels.filter(model => model !== originalModel)
+  
+  for (const fallbackModel of availableModels) {
+    try {
+      console.log(`🔄 ${fallbackModel} modeli deneniyor...`)
+      
+      const messages = [
+        {
+          role: 'system',
+          content: `Sen GitHub Models API'si ile çalışan ${fallbackModel} modeli kullanan, Türkçe konuşan, Z kuşağı tarzında rahat bir AI asistanısın. 
+          Emoji kullan, samimi konuş ama profesyonel ol. Kod yazabilir, resim çizebilir, her konuda yardım edebilirsin.
+          NOT: Şu anda ${originalModel} modeli rate limit'te olduğu için geçici olarak bu modeli kullanıyorsun! 🚦`
+        },
+        ...history.slice(-5).map((msg: any) => ({
+          role: msg.role,
+          content: msg.content
+        })),
+        {
+          role: 'user',
+          content: message
+        }
+      ]
+      
+      const response = await fetch('https://models.inference.ai.azure.com/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${process.env.GITHUB_TOKEN}`,
+          'Content-Type': 'application/json',
+          'User-Agent': 'GitHubCopilotChat/1.0'
+        },
+        body: JSON.stringify({
+          model: fallbackModel,
+          messages,
+          temperature: 0.7,
+          max_tokens: 2000,
+          stream: false
+        })
+      })
+      
+      if (response.ok) {
+        const data = await response.json()
+        const aiMessage = data.choices[0]?.message?.content || 'Bir hata oluştu, tekrar dener misin? 😅'
+        
+        console.log(`✅ ${fallbackModel} modeli başarıyla çalıştı!`)
+        
+        return NextResponse.json({ 
+          message: `${aiMessage}\n\n 🚦 *Rate Limit Bilgisi: ${originalModel} modeli geçici olarak limit'te, ${fallbackModel} modeli kullandım.*\n\n *Birkaç dakika sonra ${originalModel} modeli tekrar kullanılabilir olacak!*`
+        })
+      } else {
+        console.log(`❌ ${fallbackModel} modeli de başarısız: ${response.status}`)
+        continue
+      }
+      
+    } catch (error) {
+      console.log(`❌ ${fallbackModel} modeli hata verdi:`, error)
+      continue
+    }
+  }
+  
+  // Hiçbir model çalışmadıysa
+  return NextResponse.json({ 
+    message: `🚦 **Rate Limit:** ${originalModel} modeli geçici olarak limit'te ve diğer modeller de şu anda kullanılamıyor.\n\n⏰ Lütfen 10-15 dakika bekleyip tekrar deneyin. Rate limit resetlenince normal çalışacak!\n\n*GitHub Models API'nin ücretsiz tier'ında dakika başı sınırlar var.*`
+  })
 }
 
 // CORS headers

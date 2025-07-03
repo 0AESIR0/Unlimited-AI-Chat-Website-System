@@ -1,39 +1,39 @@
 'use client'
 
 import { useState } from 'react'
-import { ChevronDown, Cpu, Zap, Brain } from 'lucide-react'
+import { ChevronDown } from 'lucide-react'
 
 const AI_MODELS = [
+  {
+    id: 'gpt-4.1',
+    name: 'GPT-4.1',
+    provider: 'OpenAI',
+    description: 'En gelişmiş model - kod, metin, resim analizi - Profesyonel/günlük kullanım',
+    icon: '🧠',
+    color: 'bg-green-500'
+  },
   {
     id: 'gpt-4o',
     name: 'GPT-4o',
     provider: 'OpenAI',
-    description: 'En gelişmiş model - kod, metin, resim analizi',
-    icon: '🧠',
-    color: 'bg-green-500'
+    description: 'Yüksek Performans ve verim - günlük kullanım',
+    icon: '⚡',
+    color: 'bg-blue-500'
   },
   {
     id: 'gpt-4o-mini',
     name: 'GPT-4o Mini',
     provider: 'OpenAI', 
     description: 'Hızlı ve verimli - günlük kullanım',
-    icon: '⚡',
-    color: 'bg-blue-500'
-  },
-  {
-    id: 'claude-3-5-sonnet',
-    name: 'Claude 3.5 Sonnet',
-    provider: 'Anthropic',
-    description: 'Yaratıcı yazma ve analiz konusunda üstün',
     icon: '🎭',
     color: 'bg-purple-500'
   },
   {
-    id: 'llama-3.1-405b',
-    name: 'Llama 3.1 405B',
-    provider: 'Meta',
-    description: 'Açık kaynak, güçlü performans',
-    icon: '🦙',
+    id: 'stable-diffusion-xl-base-1.0',
+    name: 'Stable Diffusion XL Base 1.0',
+    provider: 'Cloudflare AI',
+    description: 'Ücretsiz resim çizdirme - 10k request/gün',
+    icon: '🎨',
     color: 'bg-orange-500'
   },
   {
@@ -42,7 +42,7 @@ const AI_MODELS = [
     provider: 'Microsoft',
     description: 'Kompakt ama güçlü model',
     icon: '💎',
-    color: 'bg-indigo-500'
+    color: 'bg-gray-500'
   }
 ]
 

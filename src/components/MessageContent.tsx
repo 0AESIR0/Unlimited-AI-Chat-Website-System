@@ -1,10 +1,12 @@
 'use client'
 
+import React from 'react'
 import ReactMarkdown from 'react-markdown'
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism'
-import { Copy, Check } from 'lucide-react'
+import { Copy, Check, X } from 'lucide-react'
 import { useState } from 'react'
+import { createPortal } from 'react-dom'
 
 interface MessageContentProps {
   content: string
@@ -13,6 +15,7 @@ interface MessageContentProps {
 
 export function MessageContent({ content, role }: MessageContentProps) {
   const [copiedCode, setCopiedCode] = useState<string | null>(null)
+  const [lightboxImage, setLightboxImage] = useState<string | null>(null)
 
   const copyToClipboard = async (code: string) => {
     await navigator.clipboard.writeText(code)
@@ -110,11 +113,61 @@ export function MessageContent({ content, role }: MessageContentProps) {
                 {children}
               </a>
             )
+          },
+          img({ src, alt }: any) {
+            // Handle empty src to prevent browser reload
+            if (!src || src.trim() === '') {
+              return (
+                <span className="inline-block bg-gray-100 dark:bg-gray-800 px-3 py-2 rounded border-2 border-dashed border-gray-300 dark:border-gray-600 text-gray-500 dark:text-gray-400">
+                  🖼️ Resim yükleniyor...
+                </span>
+              )
+            }
+            
+            return (
+              <img 
+                src={src}
+                alt={alt || 'Generated Image'}
+                className="max-w-full h-auto rounded-lg shadow-lg my-4 border border-gray-200 dark:border-gray-700 block cursor-pointer hover:shadow-xl transition-shadow"
+                onClick={() => setLightboxImage(src)}
+                onError={(e) => {
+                  e.currentTarget.style.display = 'none'
+                  console.log('Image load error:', src)
+                }}
+                onLoad={() => {
+                  console.log('Image loaded successfully')
+                }}
+              />
+            )
           }
         }}
       >
         {content}
       </ReactMarkdown>
+
+      {/* Portal ile body'e render edilen lightbox */}
+      {lightboxImage && typeof document !== 'undefined' && createPortal(
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-90 backdrop-blur-sm flex items-center justify-center z-[99999] p-2 sm:p-4 md:p-6"
+          onClick={() => setLightboxImage(null)}
+        >
+          <div className="relative w-full h-full max-w-[98vw] max-h-[98vh] sm:max-w-[95vw] sm:max-h-[95vh] md:max-w-[90vw] md:max-h-[90vh] lg:max-w-[85vw] lg:max-h-[85vh] flex flex-col items-center justify-center">
+            <button
+              onClick={() => setLightboxImage(null)}
+              className="absolute -top-8 sm:-top-12 right-0 bg-gray-600 bg-opacity-80 hover:bg-gray-500 hover:bg-opacity-90 text-white p-1.5 sm:p-2 rounded-full z-10 transition-all shadow-lg"
+            >
+              <X className="w-5 h-5 sm:w-6 sm:h-6 stroke-2" />
+            </button>
+            <img
+              src={lightboxImage}
+              alt="Enlarged view"
+              className="w-full h-full object-contain rounded-xl shadow-2xl"
+              onClick={(e) => e.stopPropagation()}
+            />
+          </div>
+        </div>,
+        document.body
+      )}
     </div>
   )
 }
