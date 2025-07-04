@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { ChevronDown } from 'lucide-react'
+import { useTranslations } from '@/hooks/useTranslations'
 
 const AI_MODELS = [
   {
@@ -53,6 +54,7 @@ interface ModelSelectorProps {
 
 export function ModelSelector({ selectedModel, onModelChange }: ModelSelectorProps) {
   const [isOpen, setIsOpen] = useState(false)
+  const { t } = useTranslations()
 
   const currentModel = AI_MODELS.find(m => m.id === selectedModel) || AI_MODELS[0]
 
@@ -108,7 +110,7 @@ export function ModelSelector({ selectedModel, onModelChange }: ModelSelectorPro
             
             <div className="border-t border-gray-200 dark:border-gray-600 p-3">
               <div className="text-xs text-gray-500 dark:text-gray-400">
-                💡 GitHub Models API ile tüm modeller premium erişimle kullanılabilir!
+                {t('models.tooltip')}
               </div>
             </div>
           </div>

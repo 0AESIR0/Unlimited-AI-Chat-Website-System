@@ -1,11 +1,12 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { useSession } from 'next-auth/react'
-import { ChatHistory, DateGroup } from '@/types/chat'
+import { ChatHistory } from '@/types/chat'
 import { ChatService } from '@/services/chatService'
 import { ChatItem } from '@/components/ChatItem'
 import { Search, Plus } from 'lucide-react'
+import { useTranslations } from '@/hooks/useTranslations'
 
 interface ChatListProps {
   onChatSelect: (chatId: string) => void
@@ -16,25 +17,12 @@ interface ChatListProps {
 
 export function ChatList({ onChatSelect, onNewChat, selectedChatId, refreshTrigger }: ChatListProps) {
   const { data: session } = useSession()
+  const { t } = useTranslations()
   const [chats, setChats] = useState<ChatHistory[]>([])
   const [searchTerm, setSearchTerm] = useState('')
   const [isLoading, setIsLoading] = useState(true)
 
-  // Chat'leri yükle
-  useEffect(() => {
-    if (session?.user?.email) {
-      loadChats()
-    }
-  }, [session])
-
-  // Refresh trigger'a göre chat'leri yeniden yükle
-  useEffect(() => {
-    if (refreshTrigger && session?.user?.email) {
-      loadChats()
-    }
-  }, [refreshTrigger, session])
-
-  const loadChats = async () => {
+  const loadChats = useCallback(async () => {
     try {
       setIsLoading(true)
       const userChats = await ChatService.getUserChats(session?.user?.email || '')
@@ -44,7 +32,21 @@ export function ChatList({ onChatSelect, onNewChat, selectedChatId, refreshTrigg
     } finally {
       setIsLoading(false)
     }
-  }
+  }, [session?.user?.email])
+
+  // Chat'leri yükle
+  useEffect(() => {
+    if (session?.user?.email) {
+      loadChats()
+    }
+  }, [session, loadChats])
+
+  // Refresh trigger'a göre chat'leri yeniden yükle
+  useEffect(() => {
+    if (refreshTrigger && session?.user?.email) {
+      loadChats()
+    }
+  }, [refreshTrigger, session, loadChats])
 
   // Chat silme
   const handleDeleteChat = async (chatId: string) => {
@@ -110,7 +112,7 @@ export function ChatList({ onChatSelect, onNewChat, selectedChatId, refreshTrigg
   if (!session) {
     return (
       <div className="p-3 text-center text-gray-500 dark:text-gray-400">
-        Giriş yapın
+        {t('chat.loginRequired')}
       </div>
     )
   }
@@ -124,7 +126,7 @@ export function ChatList({ onChatSelect, onNewChat, selectedChatId, refreshTrigg
           className="w-full flex items-center justify-center space-x-2 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200"
         >
           <Plus className="w-4 h-4" />
-          <span>Yeni Sohbet</span>
+          <span>{t('chat.newChat')}</span>
         </button>
 
         {/* Arama */}
@@ -132,7 +134,7 @@ export function ChatList({ onChatSelect, onNewChat, selectedChatId, refreshTrigg
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
           <input
             type="text"
-            placeholder="Sohbetlerde ara..."
+            placeholder={t('chat.searchPlaceholder')}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full pl-10 pr-3 py-2 text-sm bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
@@ -145,18 +147,18 @@ export function ChatList({ onChatSelect, onNewChat, selectedChatId, refreshTrigg
         {isLoading ? (
           <div className="p-3 text-center text-gray-500 dark:text-gray-400">
             <div className="animate-spin w-5 h-5 border-2 border-green-500 border-t-transparent rounded-full mx-auto mb-2"></div>
-            Yükleniyor...
+            {t('common.loading')}
           </div>
         ) : filteredChats.length === 0 ? (
           <div className="p-3 text-center text-gray-500 dark:text-gray-400">
-            {searchTerm ? 'Arama sonucu bulunamadı' : 'Henüz sohbet yok'}
+            {searchTerm ? t('chat.noSearchResults') : t('chat.noChats')}
           </div>
         ) : (
           <div className="p-3 space-y-2">
-            {renderChatGroup('Bugün', groupedChats.today)}
-            {renderChatGroup('Dün', groupedChats.yesterday)}
-            {renderChatGroup('Son 7 Gün', groupedChats.last7days)}
-            {renderChatGroup('Daha Eski', groupedChats.older)}
+            {renderChatGroup(t('dateGroups.today'), groupedChats.today)}
+            {renderChatGroup(t('dateGroups.yesterday'), groupedChats.yesterday)}
+            {renderChatGroup(t('dateGroups.last7days'), groupedChats.last7days)}
+            {renderChatGroup(t('dateGroups.older'), groupedChats.older)}
           </div>
         )}
       </div>

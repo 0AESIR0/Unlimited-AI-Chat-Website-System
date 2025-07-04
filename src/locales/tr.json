@@ -1,0 +1,64 @@
+{
+  "common": {
+    "loading": "Yükleniyor...",
+    "error": "Üzgünüm, bir hata oluştu. Lütfen tekrar deneyin.",
+    "thinking": "Düşünüyor..."
+  },
+  "header": {
+    "title": "Copilot Chat",
+    "signOut": "Çıkış yap",
+    "signOutShort": "Çıkış",
+    "signIn": "GitHub ile giriş yap"
+  },
+  "chat": {
+    "welcomeTitle": "Bugün size nasıl yardımcı olabilirim?",
+    "newChat": "Yeni sohbet",
+    "placeholder": "Copilot Chat'e mesaj yazın...",
+    "disclaimer": "Copilot Chat hata yapabilir. Önemli bilgileri kontrol edin.",
+    "searchPlaceholder": "Sohbetlerde ara...",
+    "noChats": "Henüz sohbet yok",
+    "noSearchResults": "Arama sonucu bulunamadı",
+    "loginRequired": "Giriş yapın"
+  },
+  "examples": {
+    "reactComponent": {
+      "title": "React component oluştur",
+      "description": "TypeScript ile modern UI componentleri yap",
+      "prompt": "Modern bir buton için React component yaz"
+    },
+    "learnApis": {
+      "title": "API'ler hakkında öğren",
+      "description": "Modern AI API'lerinin nasıl çalıştığını anla",
+      "prompt": "GitHub Copilot API nasıl çalışır açıkla"
+    },
+    "debugCode": {
+      "title": "Kod debug et",
+      "description": "Kodunu düzeltme ve optimize etme konusunda yardım al",
+      "prompt": "Bu JavaScript kodunu debug etmeme yardım et"
+    },
+    "techTrends": {
+      "title": "Teknoloji trendleri",
+      "description": "Teknolojideki son gelişmelerden haberdar ol",
+      "prompt": "Web geliştirmede en son trendler neler?"
+    }
+  },
+  "dateGroups": {
+    "today": "Bugün",
+    "yesterday": "Dün",
+    "last7days": "Son 7 Gün",
+    "older": "Daha Eski"
+  },
+  "landing": {
+    "title": "GitHub Copilot Chat",
+    "description": "GitHub Copilot ile sınırsız AI sohbetleri. GPT-4, Claude ve daha fazlasına limit olmadan erişim.",
+    "features": {
+      "unlimited": "Sınırsız sohbet",
+      "multipleModels": "Çoklu AI modelleri",
+      "codeGeneration": "Kod üretimi"
+    },
+    "termsText": "Bu hizmeti kullanarak Şartlar ve Gizlilik Politikamızı kabul etmiş olursunuz"
+  },
+  "models": {
+    "tooltip": "💡 GitHub Models API ile tüm modeller premium erişimle kullanılabilir!"
+  }
+}

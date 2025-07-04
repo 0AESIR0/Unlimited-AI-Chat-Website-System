@@ -1,15 +1,17 @@
 'use client'
 
-import { useState } from 'react'
 import { ChatInterface } from '../components/ChatInterface'
 import { AuthButton } from '../components/AuthButton'
 import { ThemeToggle } from '../components/ThemeToggle'
+import { LanguageSelector } from '../components/LanguageSelector'
 import { useSession } from 'next-auth/react'
+import { useTranslations } from '@/hooks/useTranslations'
 
 export default function Home() {
   const { data: session, status } = useSession()
+  const { t, isLoading: translationsLoading } = useTranslations()
 
-  if (status === 'loading') {
+  if (status === 'loading' || translationsLoading) {
     return (
       <div className="min-h-screen bg-white dark:bg-gray-900 flex items-center justify-center">
         <div className="animate-spin rounded-full h-8 w-8 border-2 border-gray-300 border-t-green-500"></div>
@@ -28,10 +30,11 @@ export default function Home() {
                 <span className="text-white font-bold text-xs sm:text-sm">C</span>
               </div>
               <h1 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white truncate">
-                Copilot Chat
+                {t('header.title')}
               </h1>
             </div>
             <div className="flex items-center space-x-2 sm:space-x-3 flex-shrink-0">
+              <LanguageSelector />
               <ThemeToggle />
               <AuthButton />
             </div>
@@ -51,27 +54,26 @@ export default function Home() {
               </div>
               
               <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
-                GitHub Copilot Chat
+                {t('landing.title')}
               </h1>
               
               <p className="text-xl text-gray-600 dark:text-gray-300 mb-8 leading-relaxed">
-                Unlimited AI conversations powered by GitHub Copilot. 
-                Access GPT-4, Claude, and more without limits.
+                {t('landing.description')}
               </p>
               
               <div className="space-y-4 mb-8">
                 <div className="flex items-center justify-center space-x-6 text-sm text-gray-500 dark:text-gray-400">
                   <div className="flex items-center space-x-2">
                     <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                    <span>Unlimited conversations</span>
+                    <span>{t('landing.features.unlimited')}</span>
                   </div>
                   <div className="flex items-center space-x-2">
                     <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                    <span>Multiple AI models</span>
+                    <span>{t('landing.features.multipleModels')}</span>
                   </div>
                   <div className="flex items-center space-x-2">
                     <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
-                    <span>Code generation</span>
+                    <span>{t('landing.features.codeGeneration')}</span>
                   </div>
                 </div>
               </div>
@@ -79,7 +81,7 @@ export default function Home() {
               <AuthButton />
               
               <div className="mt-8 text-xs text-gray-400 dark:text-gray-500">
-                By using this service, you agree to our Terms and Privacy Policy
+                {t('landing.termsText')}
               </div>
             </div>
           </div>

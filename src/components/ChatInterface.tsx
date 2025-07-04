@@ -8,9 +8,11 @@ import { MessageContent } from './MessageContent'
 import { ChatList } from '@/components/ChatList'
 import { ChatService } from '@/services/chatService'
 import { Message } from '@/types/chat'
+import { useTranslations } from '@/hooks/useTranslations'
 
 export function ChatInterface() {
   const { data: session } = useSession()
+  const { t } = useTranslations()
   const [messages, setMessages] = useState<Message[]>([])
   const [input, setInput] = useState('')
   const [isLoading, setIsLoading] = useState(false)
@@ -96,10 +98,11 @@ export function ChatInterface() {
       }
 
       setMessages(prev => [...prev, assistantMessage])
-    } catch (error) {
+    } catch (err) {
+      console.error('Chat error:', err)
       const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
-        content: 'Sorry, I encountered an error. Please try again.',
+        content: t('common.error'),
         role: 'assistant',
         timestamp: new Date()
       }
@@ -170,7 +173,7 @@ export function ChatInterface() {
             className="w-full flex items-center justify-center space-x-2 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200"
           >
             <Plus className="w-4 h-4" />
-            <span>New chat</span>
+            <span>{t('chat.newChat')}</span>
           </button>
         </div>
 
@@ -186,54 +189,54 @@ export function ChatInterface() {
                   <span className="text-white font-bold text-lg sm:text-xl">C</span>
                 </div>
                 <h2 className="text-xl sm:text-2xl font-semibold text-gray-900 dark:text-white mb-4">
-                  How can I help you today?
+                  {t('chat.welcomeTitle')}
                 </h2>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                   <button
-                    onClick={() => setInput('Write a React component for a modern button')}
+                    onClick={() => setInput(t('examples.reactComponent.prompt'))}
                     className="p-3 sm:p-4 text-left border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
                   >
                     <div className="text-gray-900 dark:text-white font-medium mb-1 text-sm sm:text-base">
-                      Create a React component
+                      {t('examples.reactComponent.title')}
                     </div>
                     <div className="text-gray-600 dark:text-gray-400 text-xs sm:text-sm">
-                      Build modern UI components with TypeScript
+                      {t('examples.reactComponent.description')}
                     </div>
                   </button>
                   
                   <button
-                    onClick={() => setInput('Explain how GitHub Copilot API works')}
+                    onClick={() => setInput(t('examples.learnApis.prompt'))}
                     className="p-4 text-left border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
                   >
                     <div className="text-gray-900 dark:text-white font-medium mb-1">
-                      Learn about APIs
+                      {t('examples.learnApis.title')}
                     </div>
                     <div className="text-gray-600 dark:text-gray-400 text-sm">
-                      Understand how modern AI APIs function
+                      {t('examples.learnApis.description')}
                     </div>
                   </button>
                   
                   <button
-                    onClick={() => setInput('Help me debug this JavaScript code')}
+                    onClick={() => setInput(t('examples.debugCode.prompt'))}
                     className="p-4 text-left border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
                   >
                     <div className="text-gray-900 dark:text-white font-medium mb-1">
-                      Debug code
+                      {t('examples.debugCode.title')}
                     </div>
                     <div className="text-gray-600 dark:text-gray-400 text-sm">
-                      Get help fixing and optimizing your code
+                      {t('examples.debugCode.description')}
                     </div>
                   </button>
                   
                   <button
-                    onClick={() => setInput('What are the latest trends in web development?')}
+                    onClick={() => setInput(t('examples.techTrends.prompt'))}
                     className="p-4 text-left border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
                   >
                     <div className="text-gray-900 dark:text-white font-medium mb-1">
-                      Tech trends
+                      {t('examples.techTrends.title')}
                     </div>
                     <div className="text-gray-600 dark:text-gray-400 text-sm">
-                      Stay updated with the latest in technology
+                      {t('examples.techTrends.description')}
                     </div>
                   </button>
                 </div>
@@ -299,7 +302,7 @@ export function ChatInterface() {
                             <span></span>
                             <span></span>
                           </div>
-                          <span className="text-sm ml-2">Düşünüyor...</span>
+                          <span className="text-sm ml-2">{t('common.thinking')}</span>
                         </div>
                       </div>
                     </div>
@@ -330,8 +333,6 @@ export function ChatInterface() {
                     
                     // Calculate new height based on content
                     const scrollHeight = textarea.scrollHeight
-                    const lineHeight = 24 // Approximate line height
-                    const padding = 24 // Top + bottom padding
                     const minHeight = 48 // Minimum height (2 lines)
                     const maxHeight = 200 // Maximum height
                     
@@ -347,7 +348,7 @@ export function ChatInterface() {
                     setInputHeight(newHeight)
                   }}
                   onKeyDown={handleKeyPress}
-                  placeholder="Message Copilot Chat..."
+                  placeholder={t('chat.placeholder')}
                   className="w-full px-3 sm:px-4 py-2 sm:py-3 pr-10 sm:pr-12 text-sm sm:text-base text-gray-900 dark:text-white bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl resize-none focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 hover:border-gray-300 dark:hover:border-gray-600"
                   rows={1}
                   style={{ 
@@ -369,7 +370,7 @@ export function ChatInterface() {
               </div>
             </div>
             <div className="mt-2 text-xs text-gray-500 dark:text-gray-400 text-center px-2">
-              Copilot Chat can make mistakes. Check important info.
+              {t('chat.disclaimer')}
             </div>
           </div>
         </div>

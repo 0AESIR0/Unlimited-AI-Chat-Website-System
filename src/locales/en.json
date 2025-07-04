@@ -1,0 +1,64 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "error": "Sorry, I encountered an error. Please try again.",
+    "thinking": "Thinking..."
+  },
+  "header": {
+    "title": "Copilot Chat",
+    "signOut": "Sign out",
+    "signOutShort": "Out",
+    "signIn": "Sign in with GitHub"
+  },
+  "chat": {
+    "welcomeTitle": "How can I help you today?",
+    "newChat": "New chat",
+    "placeholder": "Message Copilot Chat...",
+    "disclaimer": "Copilot Chat can make mistakes. Check important info.",
+    "searchPlaceholder": "Search in chats...",
+    "noChats": "No chats yet",
+    "noSearchResults": "No search results found",
+    "loginRequired": "Please sign in"
+  },
+  "examples": {
+    "reactComponent": {
+      "title": "Create a React component",
+      "description": "Build modern UI components with TypeScript",
+      "prompt": "Write a React component for a modern button"
+    },
+    "learnApis": {
+      "title": "Learn about APIs",
+      "description": "Understand how modern AI APIs function",
+      "prompt": "Explain how GitHub Copilot API works"
+    },
+    "debugCode": {
+      "title": "Debug code",
+      "description": "Get help fixing and optimizing your code",
+      "prompt": "Help me debug this JavaScript code"
+    },
+    "techTrends": {
+      "title": "Tech trends",
+      "description": "Stay updated with the latest in technology",
+      "prompt": "What are the latest trends in web development?"
+    }
+  },
+  "dateGroups": {
+    "today": "Today",
+    "yesterday": "Yesterday",
+    "last7days": "Last 7 days",
+    "older": "Older"
+  },
+  "landing": {
+    "title": "GitHub Copilot Chat",
+    "description": "Unlimited AI conversations powered by GitHub Copilot. Access GPT-4, Claude, and more without limits.",
+    "features": {
+      "unlimited": "Unlimited conversations",
+      "multipleModels": "Multiple AI models",
+      "codeGeneration": "Code generation"
+    },
+    "termsText": "By using this service, you agree to our Terms and Privacy Policy"
+  },
+  "models": {
+    "tooltip": "💡 All models available with premium access via GitHub Models API!"
+  }
+}
