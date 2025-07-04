@@ -307,7 +307,7 @@ function checkImageRequest(message: string): boolean {
   ]
   
   const requestWords = [
-    'yapar mısın', 'yapabilir misin', 'oluştur', 'üret', 'göster',
+    'yapar mısın', 'yapabilir misin', 'oluştur', 'üret',
     'istiyorum', 'isterim', 'çıkar', 'yap', 'hazırla',
     'çizebilir misin', 'çizebilir', 'çizer misin', 'çiz',
     'yaparmısın', 'yaparmisin', 'istiyoeum', 'istiyom',
@@ -339,16 +339,15 @@ KURALLARI:
 1. Öncelikle kullanıcıya nasıl bir resim istediğini sor.
 2. Gerekirse kullanıcıya sorular sorarak detayları öğren.
 3. Kullanıcının verdiği bilgileri kullanarak detaylı, açıklayıcı bir prompt oluştur.
-4. Sadece İngilizce prompt döndür
+4. Sadece İngilizce prompt döndür.
 5. Kullanıcının verdiği mesajı optimize et, gereksiz kelimeleri at.
 6. Kullanıcıya örnek bir prompt göster, böylece ne beklemesi gerektiğini anlar.
-7. Kullanıcının isteğine göre detaylı, açıklayıcı bir prompt oluştur:
-8. Sanatsal stilleri kullanıcın isteğine göre ekle.
-9. Kalite kelimelerini kullanıcın isteğine göre düşünüp ekle.
-10. Teknik detaylar ekle
-11. Negatif prompt'a ihtiyaç yok
-12. Prompt optimizasyonu yap, gereksiz ifadeleri "Thank you for the details!" gibi kullanıcıya söylediğin ekstra metinleri ekleme.
-13. Promptu türkçe değil tamamen uyumlu olacak ingilizce yaz.
+7. Sanatsal stilleri kullanıcın isteğine göre ekle.
+8. Kalite kelimelerini kullanıcın isteğine göre düşünüp ekle.
+9. Teknik detaylar ekle
+10. Negatif prompt'a ihtiyaç yok
+11. Prompt optimizasyonu yap, gereksiz ifadeleri "Thank you for the details!" gibi kullanıcıya söylediğin ekstra metinleri ekleme.
+12. Promptu türkçe değil tamamen uyumlu olacak ingilizce yaz.
 
 ÖRNEK:
 Kullanıcı: "bir kedi çiz"
@@ -534,11 +533,10 @@ async function handleRateLimit(message: string, history: any[], originalModel: s
   
   // Fallback model sıralaması
   const fallbackModels = [
+    'gpt-4.1-mini',
+    'gpt-4o',
     'gpt-4o-mini',
-    'gpt-4',
-    'gpt-3.5-turbo',
-    'phi-3.5-mini-instruct',
-    'meta-llama-3.1-70b-instruct'
+    'gpt-3.5-turbo'
   ]
   
   // Orijinal modeli listeden çıkar

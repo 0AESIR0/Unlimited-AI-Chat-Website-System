@@ -29,6 +29,14 @@ const AI_MODELS = [
     color: 'bg-purple-500'
   },
   {
+    id: 'llama3.2-vision:11b',
+    name: 'LLaMA 3.2 Vision',
+    provider: 'Meta',
+    description: 'Görsel içerik analizi - güçlü ve etkili',
+    icon: '👁️',
+    color: 'bg-gray-500'
+  },
+  {
     id: 'stable-diffusion-xl-base-1.0',
     name: 'Stable Diffusion XL Base 1.0',
     provider: 'Cloudflare AI',
@@ -36,14 +44,6 @@ const AI_MODELS = [
     icon: '🎨',
     color: 'bg-orange-500'
   },
-  {
-    id: 'phi-3.5-mini',
-    name: 'Phi-3.5 Mini',
-    provider: 'Microsoft',
-    description: 'Kompakt ama güçlü model',
-    icon: '💎',
-    color: 'bg-gray-500'
-  }
 ]
 
 interface ModelSelectorProps {

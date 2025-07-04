@@ -5,13 +5,9 @@ import { useSession } from 'next-auth/react'
 import { Send, Plus, User, Bot } from 'lucide-react'
 import { ModelSelector } from './ModelSelector'
 import { MessageContent } from './MessageContent'
-
-interface Message {
-  id: string
-  content: string
-  role: 'user' | 'assistant'
-  timestamp: Date
-}
+import { ChatList } from '@/components/ChatList'
+import { ChatService } from '@/services/chatService'
+import { Message } from '@/types/chat'
 
 export function ChatInterface() {
   const { data: session } = useSession()
@@ -20,6 +16,8 @@ export function ChatInterface() {
   const [isLoading, setIsLoading] = useState(false)
   const [selectedModel, setSelectedModel] = useState('gpt-4.1')
   const [inputHeight, setInputHeight] = useState(48)
+  const [currentChatId, setCurrentChatId] = useState<string | null>(null)
+  const [refreshChatList, setRefreshChatList] = useState(0)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
@@ -32,7 +30,7 @@ export function ChatInterface() {
   }, [messages])
 
   const sendMessage = async () => {
-    if (!input.trim() || isLoading) return
+    if (!input.trim() || isLoading || !session?.user?.email) return
 
     const userMessage: Message = {
       id: Date.now().toString(),
@@ -41,6 +39,7 @@ export function ChatInterface() {
       timestamp: new Date()
     }
 
+    // UI'yi hemen güncelle
     setMessages(prev => [...prev, userMessage])
     setInput('')
     
@@ -53,6 +52,7 @@ export function ChatInterface() {
     setIsLoading(true)
 
     try {
+      // API'ye request gönder
       const response = await fetch('/api/chat', {
         method: 'POST',
         headers: {
@@ -74,6 +74,25 @@ export function ChatInterface() {
         content: data.message,
         role: 'assistant',
         timestamp: new Date()
+      }
+
+      // Firebase'e kaydet
+      if (currentChatId) {
+        // Mevcut chat'e mesaj ekle
+        await ChatService.addMessage(session.user.email, currentChatId, userMessage)
+        await ChatService.addMessage(session.user.email, currentChatId, assistantMessage)
+      } else {
+        // Yeni chat oluştur
+        const newChatId = await ChatService.createChat(
+          session.user.email,
+          userMessage,
+          selectedModel
+        )
+        setCurrentChatId(newChatId)
+        await ChatService.addMessage(session.user.email, newChatId, assistantMessage)
+        
+        // ChatList'i yenile
+        setRefreshChatList(prev => prev + 1)
       }
 
       setMessages(prev => [...prev, assistantMessage])
@@ -99,29 +118,35 @@ export function ChatInterface() {
 
   const startNewChat = () => {
     setMessages([])
+    setCurrentChatId(null)
+  }
+
+  // Chat seçme
+  const handleChatSelect = async (chatId: string) => {
+    try {
+      if (!session?.user?.email) return
+      
+      const chat = await ChatService.getChat(session.user.email, chatId)
+      if (chat) {
+        setMessages(chat.messages)
+        setCurrentChatId(chatId)
+        setSelectedModel(chat.model)
+      }
+    } catch (error) {
+      console.error('Chat yükleme hatası:', error)
+    }
   }
 
   return (
     <div className="flex-1 flex relative">
-      {/* Sidebar - Fixed below header */}
+      {/* Sidebar - Firebase Chat List */}
       <div className="hidden md:flex w-60 lg:w-64 bg-gray-50 dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 flex-col fixed left-0 bottom-0 z-10" style={{ top: '49px', height: 'calc(100vh - 49px)' }}>
-        <div className="p-3 space-y-3" style={{ paddingTop: '1.5rem', paddingBottom: '1rem' }}>
-          <button
-            onClick={startNewChat}
-            className="w-full flex items-center justify-center space-x-2 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200 hover-lift"
-          >
-            <Plus className="w-4 h-4" />
-            <span>New chat</span>
-          </button>
-        </div>
-        
-        <div className="flex-1 overflow-y-auto border-t dark:border-gray-700">
-          <div className="p-3 space-y-2">
-            <div className="text-xs font-medium text-gray-500 dark:text-gray-400 px-2 py-1">
-              Recent Chats
-            </div>
-          </div>
-        </div>
+        <ChatList
+          onChatSelect={handleChatSelect}
+          onNewChat={startNewChat}
+          selectedChatId={currentChatId || undefined}
+          refreshTrigger={refreshChatList}
+        />
         
         <div className="p-3 border-t border-gray-200 dark:border-gray-700">
           <ModelSelector selectedModel={selectedModel} onModelChange={setSelectedModel} />
@@ -228,7 +253,19 @@ export function ChatInterface() {
                       </div>
                       <div className="flex-shrink-0">
                         <div className="w-7 h-7 sm:w-8 sm:h-8 bg-gray-900 dark:bg-gray-100 rounded-full flex items-center justify-center">
-                          <User className="w-3 h-3 sm:w-4 sm:h-4 text-white dark:text-gray-900" />
+                          {session?.user?.image ? (
+                            <img 
+                              src={session.user.image} 
+                              alt="Profile"
+                              className="w-7 h-7 sm:w-8 sm:h-8 rounded-full"
+                              onError={(e) => {
+                                e.currentTarget.style.display = 'none'
+                                const userIcon = e.currentTarget.nextElementSibling as HTMLElement
+                                userIcon?.classList.remove('hidden')
+                              }}
+                            />
+                          ) : null}
+                          <User className={`w-4 h-4 sm:w-5 sm:h-5 text-white ${session?.user?.image ? 'hidden' : ''}`} />
                         </div>
                       </div>
                     </div>
