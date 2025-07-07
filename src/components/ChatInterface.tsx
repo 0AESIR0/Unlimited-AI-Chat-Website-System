@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
-import { Send, Plus, User, Bot } from 'lucide-react'
+import { ArrowUp, MessageSquare, Send, Plus, User, Bot } from 'lucide-react'
 import { ModelSelector } from './ModelSelector'
 import { MessageContent } from './MessageContent'
 import { ChatList } from '@/components/ChatList'
@@ -273,8 +273,8 @@ export function ChatInterface() {
                       </div>
                     </div>
                   ) : (
-                    // AI message - Left aligned  
-                    <div className="flex space-x-3 sm:space-x-4 max-w-[80%] sm:max-w-[70%]">
+                    // AI message - Left aligned, wider area
+                    <div className="flex space-x-3 sm:space-x-4 max-w-[95%] sm:max-w-[90%]">
                       <div className="flex-shrink-0">
                         <div className="w-7 h-7 sm:w-8 sm:h-8 bg-green-500 rounded-full flex items-center justify-center">
                           <Bot className="w-3 h-3 sm:w-4 sm:h-4 text-white" />
@@ -290,7 +290,7 @@ export function ChatInterface() {
               
               {isLoading && (
                 <div className="flex justify-start message-enter">
-                  <div className="flex space-x-4 max-w-[80%] sm:max-w-[70%]">
+                  <div className="flex space-x-4 max-w-[90%] sm:max-w-[85%]">
                     <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
                       <Bot className="w-4 h-4 text-white" />
                     </div>
@@ -344,17 +344,24 @@ export function ChatInterface() {
                       newHeight = minHeight
                     }
                     
+                    // Dinamik overflow kontrolü
+                    if (scrollHeight > maxHeight) {
+                      textarea.style.overflowY = 'auto'
+                    } else {
+                      textarea.style.overflowY = 'hidden'
+                    }
+                    
                     textarea.style.height = newHeight + 'px'
                     setInputHeight(newHeight)
                   }}
                   onKeyDown={handleKeyPress}
                   placeholder={t('chat.placeholder')}
-                  className="w-full px-3 sm:px-4 py-2 sm:py-3 pr-10 sm:pr-12 text-sm sm:text-base text-gray-900 dark:text-white bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl resize-none focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 hover:border-gray-300 dark:hover:border-gray-600"
+                  className="w-full px-3 sm:px-4 py-2 sm:py-3 pr-10 sm:pr-12 text-sm sm:text-base text-gray-900 dark:text-white bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl resize-none focus:outline-none focus:ring-1 focus:ring-gray-400 focus:border-transparent transition-all duration-200 hover:border-gray-300 dark:hover:border-gray-600 textarea-scrollbar"
                   rows={1}
                   style={{ 
                     minHeight: '48px', 
                     maxHeight: '200px', 
-                    overflow: 'hidden',
+                    overflowY: 'hidden',
                     height: 'auto',
                     lineHeight: '24px'
                   }}
@@ -363,9 +370,9 @@ export function ChatInterface() {
                 <button
                   onClick={sendMessage}
                   disabled={!input.trim() || isLoading}
-                  className="absolute right-2 sm:right-3 top-2 sm:top-3 p-2 text-gray-400 hover:text-green-500 dark:hover:text-green-400 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 rounded-lg flex items-center justify-center w-8 h-8"
+                  className="btnkus absolute right-2 sm:right-3 p-2 text-gray-400 hover:text-green-500 dark:hover:text-green-400 transition-colors duration-200 rounded-lg flex items-center justify-center w-8 h-8"
                 >
-                  <Send className="w-4 h-4 sm:w-5 sm:h-5" />
+                  <ArrowUp className="w-4 h-4 sm:w-5 sm:h-5" />
                 </button>
               </div>
             </div>

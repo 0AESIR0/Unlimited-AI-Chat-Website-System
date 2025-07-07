@@ -97,6 +97,33 @@ body {
   background: #6b7280;
 }
 
+/* Textarea custom scrollbar */
+.textarea-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+
+.textarea-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.textarea-scrollbar::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 2px;
+}
+
+.textarea-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af;
+}
+
+/* Dark mode textarea scrollbar */
+.dark .textarea-scrollbar::-webkit-scrollbar-thumb {
+  background: #4b5563;
+}
+
+.dark .textarea-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #6b7280;
+}
+
 /* Chat message animasyonları */
 .message-enter {
   opacity: 0;
@@ -162,3 +189,31 @@ input:focus, textarea:focus, button:focus {
     background: rgba(255, 255, 255, 0.5);
   }
 }
+
+
+/* Send button custom styling */
+.btnkus {
+  transition: all 0.2s ease-in-out;
+  background-color: #ffffff;
+  cursor: not-allowed;
+  border-radius: 50px;
+  color: #000000;
+  bottom: 8px;
+}
+
+/* Aktif buton - pointer cursor ve hover efektleri */
+.btnkus:not(:disabled) {
+  cursor: pointer;
+}
+
+.btnkus:not(:disabled):hover {
+  background-color: #c1c1c1;
+  color: #000000;
+}
+
+/* Disabled buton - opacity ve cursor */
+.btnkus:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
