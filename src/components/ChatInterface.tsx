@@ -16,7 +16,7 @@ export function ChatInterface() {
   const [messages, setMessages] = useState<Message[]>([])
   const [input, setInput] = useState('')
   const [isLoading, setIsLoading] = useState(false)
-  const [selectedModel, setSelectedModel] = useState('gpt-4.1')
+  const [selectedModel, setSelectedModel] = useState('shira')
   const [inputHeight, setInputHeight] = useState(48)
   const [currentChatId, setCurrentChatId] = useState<string | null>(null)
   const [refreshChatList, setRefreshChatList] = useState(0)
@@ -144,14 +144,18 @@ export function ChatInterface() {
     <div className="flex-1 flex relative">
       {/* Sidebar - Firebase Chat List */}
       <div className="hidden md:flex w-60 lg:w-64 bg-gray-50 dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 flex-col fixed left-0 bottom-0 z-10" style={{ top: '49px', height: 'calc(100vh - 49px)' }}>
-        <ChatList
-          onChatSelect={handleChatSelect}
-          onNewChat={startNewChat}
-          selectedChatId={currentChatId || undefined}
-          refreshTrigger={refreshChatList}
-        />
+        {/* Scrollable Chat List */}
+        <div className="flex-1 overflow-hidden">
+          <ChatList
+            onChatSelect={handleChatSelect}
+            onNewChat={startNewChat}
+            selectedChatId={currentChatId || undefined}
+            refreshTrigger={refreshChatList}
+          />
+        </div>
         
-        <div className="p-3 border-t border-gray-200 dark:border-gray-700">
+        {/* Fixed Bottom Section - Model Selector */}
+        <div className="p-3 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
           <ModelSelector selectedModel={selectedModel} onModelChange={setSelectedModel} />
           <div style={{ marginTop: '0.7rem' }} className="flex items-center space-x-2 text-xs text-gray-500 dark:text-gray-400">
             <div className="w-2 h-2 bg-green-500 rounded-full"></div>

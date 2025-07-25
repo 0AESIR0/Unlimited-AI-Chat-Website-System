@@ -25,22 +25,6 @@ export async function POST(request: NextRequest) {
     // Debug: Model ve resim algılama kontrolü
     console.log('🔍 Debug - Model:', model)
     console.log('🔍 Debug - Mesaj:', message)
-    
-    // Akıllı resim algılama - GPT chat'lerinde resim isteği kontrolü
-    const isImageRequest = checkImageRequest(message)
-    console.log('🔍 Debug - Resim isteği algılandı mı?', isImageRequest)
-    console.log('🔍 Debug - Model gpt içeriyor mu?', model.includes('gpt'))
-    
-    if (isImageRequest && (model.includes('gpt') || model.includes('phi'))) {
-      console.log('🎨 GPT resim isteği algılandı, Stable Diffusion\'a yönlendiriliyor...')
-      console.log('📝 Orijinal mesaj:', message)
-      
-      // GPT'den önce detayları al ve prompt optimize et
-      const optimizedPrompt = await generateImagePrompt(message, history, model)
-      
-      // Stable Diffusion ile resim çiz
-      return await generateImageWithStableDiffusion(optimizedPrompt, message)
-    }
 
     // Cloudflare AI - Stable Diffusion XL için direkt resim çizdirme
     if (model === 'stable-diffusion-xl-base-1.0') {
@@ -91,6 +75,85 @@ export async function POST(request: NextRequest) {
         console.log('❌ Resim çizme veya upload hatası:', error.message)
         return NextResponse.json({ 
           message: `🎨 Resim çizmeye çalışıyorum ama bir sorun var: ${error.message}\n\nTekrar dener misin? 😅`
+        })
+      }
+    }
+
+    // Shira (Özel Model) için handling
+    if (model === 'shira') {
+      console.log('✨ Shira modeli kullanılıyor...')
+      console.log('📝 Mesaj:', message)
+      
+      // Shira için resim isteği algılama
+      const isImageRequest = checkImageRequest(message)
+      console.log('🔍 Shira resim isteği algılandı mı?', isImageRequest)
+      
+      if (isImageRequest) {
+        console.log('🎨 Shira resim modu aktif, Stable Diffusion ile çiziliyor...')
+        
+        // Shira'dan resim promtu optimize et
+        try {
+          const optimizeResponse = await fetch(`${process.env.SHIRA_API_URL}/api/chat`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'ngrok-skip-browser-warning': 'true'
+            },
+            body: JSON.stringify({ 
+              message: `Bu mesajı resim çizdirme için detaylı İngilizce prompt'a çevir (sadece prompt ver, açıklama yapma): "${message}"`,
+              history: []
+            })
+          })
+
+          let optimizedPrompt = message // Fallback
+          if (optimizeResponse.ok) {
+            const optimizeData = await optimizeResponse.json()
+            optimizedPrompt = optimizeData.response || optimizeData.message || message
+            console.log('🎨 Shira prompt optimizasyonu:', optimizedPrompt)
+          }
+
+          // Stable Diffusion ile resim çiz
+          return await generateImageWithStableDiffusion(optimizedPrompt, message)
+          
+        } catch (optimizeError: any) {
+          console.log('⚠️ Shira prompt optimizasyonu başarısız, orijinal mesajla devam:', optimizeError.message)
+          return await generateImageWithStableDiffusion(message, message)
+        }
+      }
+      
+      // Normal metin sohbeti
+      try {
+        const shiraResponse = await fetch(`${process.env.SHIRA_API_URL}/api/chat`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'ngrok-skip-browser-warning': 'true'
+          },
+          body: JSON.stringify({ 
+            message: message,
+            history: history || []
+          })
+        })
+
+        if (!shiraResponse.ok) {
+          throw new Error(`Shira API hatası: ${shiraResponse.status}`)
+        }
+
+        const shiraData = await shiraResponse.json()
+        
+        if (shiraData.error) {
+          throw new Error(shiraData.error)
+        }
+
+        console.log('✅ Shira yanıtı alındı')
+        return NextResponse.json({ 
+          message: shiraData.response || shiraData.message || 'Shira\'dan yanıt alınamadı 😔'
+        })
+        
+      } catch (error: any) {
+        console.log('❌ Shira API hatası:', error.message)
+        return NextResponse.json({ 
+          message: `✨ Shira ile konuşmaya çalışıyorum ama bir sorun var: ${error.message}\n\nAPI bağlantısını kontrol eder misin? 🔧`
         })
       }
     }
@@ -504,7 +567,7 @@ async function generateImageWithStableDiffusion(prompt: string, originalMessage:
       console.log('✅ Resim başarıyla ImgBB\'ye upload edildi:', imageUrl)
       
       return NextResponse.json({ 
-        message: `🎨 İşte çizdiğim resim!\n\n![Generated Image](${imageUrl})\n\n✨ GPT tarafından optimize edilerek çizildi!\n📝 Kullanılan prompt: "${prompt}"\n\nBaşka bir isteğin var mı? 🖼️`
+        message: `🎨 İşte çizdiğim resim!\n\n![Generated Image](${imageUrl})\n\n✨ Senin için promptu düzenleyip istediğin resmi oluşturdum.\n📝 Kullanılan prompt: "${prompt}"\n\nBaşka bir isteğin var mı? 🖼️`
       })
       
     } catch (uploadError: any) {
@@ -515,7 +578,7 @@ async function generateImageWithStableDiffusion(prompt: string, originalMessage:
       const fallbackImageUrl = `data:image/png;base64,${imageBase64}`
       
       return NextResponse.json({ 
-        message: `🎨 İşte çizdiğim resim!\n\n![Generated Image](${fallbackImageUrl})\n\n✨ GPT tarafından optimize edilerek çizildi!\n📝 Kullanılan prompt: "${prompt}"\n\nBaşka bir isteğin var mı? 🖼️`
+        message: `🎨 İşte çizdiğim resim!\n\n![Generated Image](${fallbackImageUrl})\n\n✨ Senin için promptu düzenleyip istediğin resmi oluşturdum.\n📝 Kullanılan prompt: "${prompt}"\n\nBaşka bir isteğin var mı? 🖼️`
       })
     }
     

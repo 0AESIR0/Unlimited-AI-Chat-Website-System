@@ -120,10 +120,10 @@ export function ChatList({ onChatSelect, onNewChat, selectedChatId, refreshTrigg
   return (
     <div className="flex flex-col h-full">
       {/* Header */}
-      <div className="p-3 space-y-3">
+      <div className="p-3 space-y-3 border-b border-gray-200 dark:border-gray-700">
         <button
           onClick={onNewChat}
-          className="w-full flex items-center justify-center space-x-2 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200"
+          className="mt-1 mb-2 w-full flex items-center justify-center space-x-2 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200"
         >
           <Plus className="w-4 h-4" />
           <span>{t('chat.newChat')}</span>

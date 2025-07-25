@@ -59,6 +59,11 @@
     "termsText": "By using this service, you agree to our Terms and Privacy Policy"
   },
   "models": {
-    "tooltip": "💡 All models available with premium access via GitHub Models API!"
+    "tooltip": "💡 All models available with premium access via GitHub Models API!",
+    "shira": {
+      "name": "Shira",
+      "description": "🚀 Custom personalized model - text & image generation support",
+      "status": "✨ Your custom model is active!"
+    }
   }
 }

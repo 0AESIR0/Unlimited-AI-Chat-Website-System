@@ -59,6 +59,11 @@
     "termsText": "Bu hizmeti kullanarak Şartlar ve Gizlilik Politikamızı kabul etmiş olursunuz"
   },
   "models": {
-    "tooltip": "💡 GitHub Models API ile tüm modeller premium erişimle kullanılabilir!"
+    "tooltip": "💡 GitHub Models API ile tüm modeller premium erişimle kullanılabilir!",
+    "shira": {
+      "name": "Shira",
+      "description": "🚀 Özel kişiselleştirilmiş model - metin & resim çizdirme desteği",
+      "status": "✨ Kendi modeliniz aktif!"
+    }
   }
 }

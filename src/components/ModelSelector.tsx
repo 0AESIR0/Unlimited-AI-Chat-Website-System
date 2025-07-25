@@ -14,6 +14,14 @@ const AI_MODELS = [
     color: 'bg-green-500'
   },
   {
+    id: 'shira',
+    name: 'Shira',
+    provider: 'Custom',
+    description: '🚀 Özel kişiselleştirilmiş model - metin & resim çizdirme desteği',
+    icon: '✨',
+    color: 'bg-gradient-to-r from-purple-500 to-pink-500'
+  },
+  {
     id: 'gpt-4o',
     name: 'GPT-4o',
     provider: 'OpenAI',
