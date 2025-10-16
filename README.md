@@ -113,6 +113,6 @@ Visit [http://localhost:3000](http://localhost:3000) and start chatting! 🎉
 
 ---
 
-**Made with 💚 by a GitHub Copilot enthusiast!**
+**Made with 💚 by a 0AESIR0**
 
 ---
