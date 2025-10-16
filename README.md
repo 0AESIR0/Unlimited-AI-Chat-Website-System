@@ -1,5 +1,3 @@
----
-
 # Unlimited AI Chat 🚀
 
 Experience **ChatGPT-style unlimited AI chat** powered by the **GitHub Copilot API**!
@@ -13,8 +11,6 @@ Say goodbye to usage limits and unlock full AI potential using **your own GitHub
 * 🔐 **GitHub OAuth** – Secure authentication via GitHub
 * 🌙 **Modern UI** – Dark mode, responsive layout, and smooth design
 * ⚡ **Blazing Fast** – Built with Next.js 15, TypeScript, and Tailwind CSS
-
----
 
 ## 🚀 Setup
 
