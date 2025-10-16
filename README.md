@@ -17,7 +17,7 @@ Say goodbye to usage limits and unlock full AI potential using **your own GitHub
 ### 1. Clone the Project
 
 ```bash
-git clone <repo-url>
+git clone https://github.com/0AESIR0/Unlimited-AI-Chat-Website-System.git
 cd github-copilot-chat
 ```
 
